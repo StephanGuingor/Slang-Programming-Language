@@ -37,6 +37,24 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return &object.Rune{Value: node.Value}
 	case *ast.Boolean:
 		return nativeBoolToBooleanObject(node.Value)
+	case *ast.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+
+		return evalIndexExpression(left, index)
+	case *ast.ArrayLiteral:
+		elements := evalExpressions(node.Elements, env)
+		if len(elements) == 1 && isError(elements[0]) {
+			return elements[0]
+		}
+		return &object.Array{Elements: elements}
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
 		if isError(right) {
@@ -71,7 +89,6 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		ident := node.TokenLiteral()
 
 		return evalPostfixExpression(node.Operator, env, ident)
-
 	case *ast.LetStatement:
 		val := Eval(node.Value, env)
 		if isError(val) {
@@ -100,9 +117,37 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 
 		return applyFunction(function, args)
+	case *ast.HashLiteral:
+		return evalHashLiteral(node, env)
 
 	}
 	return NULL
+}
+
+func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {
+	pairs := make(map[object.HashKey]object.HashPair)
+
+	for keyNode, valueNode := range node.Pairs {
+		key := Eval(keyNode, env)
+		if isError(key) {
+			return key
+		}
+
+		hashKey, ok := key.(object.Hashable)
+		if !ok {
+			return newError("unusable as hash key: %s", key.Type())
+		}
+
+		value := Eval(valueNode, env)
+		if isError(value) {
+			return value
+		}
+
+		hashed := hashKey.HashKey()
+		pairs[hashed] = object.HashPair{Key: key, Value: value}
+	}
+
+	return &object.Hash{Pairs: pairs}
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
@@ -111,9 +156,57 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		extendedEnv := extendFunctionEnv(fn, args)
 		evaluated := Eval(fn.Body, extendedEnv)
 		return unwrapReturnValue(evaluated)
+	case *object.Builtin:
+		return fn.Fn(args...)
 	}
 
 	return newError("not a function: %s", fn.Type())
+}
+
+func evalArrayIndexExpression(array, index object.Object) object.Object {
+	arrayObject := array.(*object.Array)
+
+	idx := index.(*object.Integer).Value
+	max := int64(len(arrayObject.Elements) - 1)
+
+	// if index is -n, return the nth element from the end
+	if idx < 0 {
+		idx = max + idx + 1
+	}
+
+	if idx < 0 || idx > max {
+		return newError("index out of range: %d", idx)
+	}
+
+	return arrayObject.Elements[idx]
+}
+
+func evalHashIndexExpression(hash, index object.Object) object.Object {
+	hashObject := hash.(*object.Hash)
+
+	key, ok := index.(object.Hashable)
+	if !ok {
+		return newError("unusable as hash key: %s", index.Type())
+	}
+
+	pair, ok := hashObject.Pairs[key.HashKey()]
+	if !ok {
+		return NULL
+	}
+
+	return pair.Value
+}
+
+func evalIndexExpression(left, index object.Object) object.Object {
+	structure := left.Type()
+	switch {
+	case structure == object.ARRAY:
+		return evalArrayIndexExpression(left, index)
+	case structure == object.HASH:
+		return evalHashIndexExpression(left, index)
+	}
+
+	return newError("index operator not supported: %s", structure)
 }
 
 func extendFunctionEnv(
@@ -191,7 +284,6 @@ func evalPostfixExpression(operator string, env *object.Environment, ident strin
 	return val
 }
 
-
 func evalForExpression(fe *ast.ForExpression, env *object.Environment) object.Object {
 	var bodyResult object.Object
 
@@ -223,11 +315,15 @@ func evalForExpression(fe *ast.ForExpression, env *object.Environment) object.Ob
 
 func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object {
 	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("identifier not found: " + node.Value)
+	if ok {
+		return val
 	}
 
-	return val
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
+	}
+
+	return newError("identifier not found: " + node.Value)
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {

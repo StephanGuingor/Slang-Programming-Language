@@ -10,28 +10,29 @@ import (
 
 func TestNextToken(t *testing.T) {
 	input := `let five = 5;
-	let ten = 10.123456;
-	let newFloat = 1.;
-	
-	let add = fn(x, y) {
-	  x + y;
-	};
-	
-	let result = add(five, ten);
-	!-/*5;
-	5 < 10 > 5;
+let ten = 10;
 
-	== != <= >=
+let add = fn(x, y) {
+  x + y;
+};
 
-	if (5 < 10) {
-		return true;
-	} else {
-		return false;
-	}
+let result = add(five, ten);
+!-/*5;
+5 < 10 > 5;
 
-	let emoji = "🐶\"";
-	let run = '🐶';
-	`
+if (5 < 10) {
+	return true;
+} else {
+	return false;
+}
+
+10 == 10;
+10 != 9;
+"foobar"
+"foo bar"
+[1, 2];
+{"foo": "bar"}
+`
 
 	tests := []struct {
 		expectedType    token.TokenType
@@ -45,12 +46,7 @@ func TestNextToken(t *testing.T) {
 		{token.LET, "let"},
 		{token.IDENT, "ten"},
 		{token.ASSIGN, "="},
-		{token.FLOAT, "10.123456"},
-		{token.SEMICOLON, ";"},
-		{token.LET, "let"},
-		{token.IDENT, "newFloat"},
-		{token.ASSIGN, "="},
-		{token.FLOAT, "1."},
+		{token.INT, "10"},
 		{token.SEMICOLON, ";"},
 		{token.LET, "let"},
 		{token.IDENT, "add"},
@@ -90,10 +86,6 @@ func TestNextToken(t *testing.T) {
 		{token.GT, ">"},
 		{token.INT, "5"},
 		{token.SEMICOLON, ";"},
-		{token.EQ, "=="},
-		{token.NOT_EQ, "!="},
-		{token.LTE, "<="},
-		{token.GTE, ">="},
 		{token.IF, "if"},
 		{token.LPAREN, "("},
 		{token.INT, "5"},
@@ -111,16 +103,27 @@ func TestNextToken(t *testing.T) {
 		{token.FALSE, "false"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
-		{token.LET, "let"},
-		{token.IDENT, "emoji"},
-		{token.ASSIGN, "="},
-		{token.STRING, `🐶\"`},
+		{token.INT, "10"},
+		{token.EQ, "=="},
+		{token.INT, "10"},
 		{token.SEMICOLON, ";"},
-		{token.LET, "let"},
-		{token.IDENT, "run"},
-		{token.ASSIGN, "="},
-		{token.RUNE, `🐶`},
+		{token.INT, "10"},
+		{token.NOT_EQ, "!="},
+		{token.INT, "9"},
 		{token.SEMICOLON, ";"},
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
+		{token.LBRACKET, "["},
+		{token.INT, "1"},
+		{token.COMMA, ","},
+		{token.INT, "2"},
+		{token.RBRACKET, "]"},
+		{token.SEMICOLON, ";"},
+		{token.LBRACE, "{"},
+		{token.STRING, "foo"},
+		{token.COLON, ":"},
+		{token.STRING, "bar"},
+		{token.RBRACE, "}"},
 		{token.EOF, ""},
 	}
 

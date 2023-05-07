@@ -2,12 +2,14 @@ package repl
 
 import (
 	"bufio"
+	"compiler-book/ast"
 	"compiler-book/evaluator"
 	"compiler-book/lexer"
 	"compiler-book/object"
 	"compiler-book/parser"
 	"fmt"
 	"io"
+	"os"
 )
 
 const PROMPT = ">> "
@@ -45,6 +47,49 @@ func Start(in io.Reader, out io.Writer) {
 			io.WriteString(out, "\n")
 		}
 	}
+}
+
+func StartFile(filename string) {
+	env := object.NewEnvironment()
+	program := parseFile(filename)
+
+	if program == nil {
+		return
+	}
+
+	err := evaluator.Eval(program, env)
+	if isError(err) {
+		fmt.Println(err.Inspect())
+	}
+}
+
+func isError(obj object.Object) bool {
+	if obj != nil {
+		return obj.Type() == object.ERROR
+	}
+	return false
+}
+
+func parseFile(filename string) *ast.Program {
+	// read file to string
+
+	file, err := os.ReadFile(filename)
+	if err != nil {
+		fmt.Println(err)
+		return nil
+	}
+
+	l := lexer.New(string(file))
+	p := parser.New(l)
+
+	program := p.ParseProgram()
+
+	if len(p.Errors()) != 0 {
+		printParserErrors(os.Stdout, p.Errors())
+		return nil
+	}
+
+	return program
 }
 
 func printParserErrors(out io.Writer, errors []*parser.ParseError) {

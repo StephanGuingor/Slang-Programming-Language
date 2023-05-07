@@ -5,11 +5,12 @@ const (
 	EOF     TokenType = "EOF"
 
 	// Identifiers + literals
-	IDENT  TokenType = "IDENT" // add, foobar, x, y, ...
-	INT    TokenType = "INT"   // 1343456
-	FLOAT  TokenType = "FLOAT" // 1.23456
-	STRING TokenType = "STRING"
-	RUNE   TokenType = "RUNE"
+	IDENT   TokenType = "IDENT" // add, foobar, x, y, ...
+	INT     TokenType = "INT"   // 1343456
+	FLOAT   TokenType = "FLOAT" // 1.23456
+	STRING  TokenType = "STRING"
+	RUNE    TokenType = "RUNE"
+	COMMENT TokenType = "COMMENT"
 
 	// Operators
 	ASSIGN   TokenType = "="
@@ -34,11 +35,14 @@ const (
 	SEMICOLON TokenType = ";"
 	DQUOTE    TokenType = "\""
 	SQUOTE    TokenType = "'"
+	COLON     TokenType = ":"
 
-	LPAREN TokenType = "("
-	RPAREN TokenType = ")"
-	LBRACE TokenType = "{"
-	RBRACE TokenType = "}"
+	LPAREN   TokenType = "("
+	RPAREN   TokenType = ")"
+	LBRACE   TokenType = "{"
+	RBRACE   TokenType = "}"
+	LBRACKET TokenType = "["
+	RBRACKET TokenType = "]"
 
 	// Keywords
 	FUNCTION TokenType = "FUNCTION"

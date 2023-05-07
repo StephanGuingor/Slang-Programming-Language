@@ -1,13 +1,19 @@
-let createAdder = fn (x) {
-    fn (y) {
-        return x + y;
+// import "functions.sl", We can't import files yet
+
+print("Hello World!")
+
+let x = {
+    "name": "John",
+    "nested": {
+        "name": "Doe"
     }
 }
 
-let add5 = createAdder(5);
-let add10 = createAdder(10);
+print(x["name"])
+print(x["nested"]["name"])
 
-let apply = fn (funcA, funcB) {
-    return funcA(funcB);
+let y = [1, 2, 3, 4, 5]
+
+for (let i = 0; i < len(y); i++) {
+    print(x["nested"]["name"], y[i])
 }
- 

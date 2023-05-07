@@ -1,0 +1,41 @@
+{
+  "name": "slang-syntax-highlighting",
+  "displayName": "slang-syntax-highlighting",
+  "description": "Syntax Highlighter for Slang!",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.78.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "slang",
+        "aliases": [
+          "Slang",
+          "slang"
+        ],
+        "extensions": [
+          ".sl"
+        ],
+        "configuration": "./language-configuration.json",
+        "icon": {
+          "light": "./images/slang-light.svg",
+          "dark": "./images/slang-dark.svg"
+        }
+      }
+    ],
+    "grammars": [
+      {
+        "language": "slang",
+        "scopeName": "source.slang",
+        "path": "./syntaxes/slang.tmLanguage.json"
+      }
+    ]
+  },
+  "devDependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

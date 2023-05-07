@@ -8,6 +8,13 @@ import (
 )
 
 func main() {
+	// args := os.Args
+	
+	if len(os.Args) == 2 {
+		repl.StartFile(os.Args[1])
+		return
+	}
+
 	user, err := user.Current()
 	if err != nil {
 		panic(err)

@@ -1,0 +1,21 @@
+{
+  "name": "slang-monokai",
+  "displayName": "slang-monokai",
+  "description": "Monokai for Slang",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.78.0"
+  },
+  "categories": [
+    "Themes"
+  ],
+  "contributes": {
+    "themes": [
+      {
+        "label": "Slang Monokai",
+        "uiTheme": "vs-dark",
+        "path": "./themes/Slang Monokai-color-theme.json"
+      }
+    ]
+  }
+}

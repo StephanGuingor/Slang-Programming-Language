@@ -67,7 +67,13 @@ func (l *lexer) NextToken() token.Token {
 	case '\'':
 		tok.Literal, tok.Type = l.readRune()
 		tok.Metadata = token.TokenMetadata{Line: l.line, Column: l.column}
+	case ':':
+		tok = l.newToken(token.COLON, l.ch)
 	case '/':
+		if l.peekChar() == '/' {
+			l.skipComment()
+			return l.NextToken()
+		}
 		tok = l.newToken(token.SLASH, l.ch)
 	case '*':
 		tok = l.newToken(token.ASTERISK, l.ch)
@@ -98,6 +104,10 @@ func (l *lexer) NextToken() token.Token {
 	case '"':
 		tok.Literal, tok.Type = l.readString()
 		tok.Metadata = token.TokenMetadata{Line: l.line, Column: l.column}
+	case '[':
+		tok = l.newToken(token.LBRACKET, l.ch)
+	case ']':
+		tok = l.newToken(token.RBRACKET, l.ch)
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
@@ -118,6 +128,12 @@ func (l *lexer) NextToken() token.Token {
 
 	l.readChar()
 	return tok
+}
+
+func (l *lexer) skipComment() {
+	for l.ch != '\n' && l.ch != 0 {
+		l.readChar()
+	}
 }
 
 func (l *lexer) skipWhitespace() {
