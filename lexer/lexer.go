@@ -211,6 +211,10 @@ func (l *lexer) readString() (string, token.TokenType) {
 func (l *lexer) readRune() (string, token.TokenType) {
 	position := l.position + 1
 
+	if position >= len(l.input) { // avoid index out of range
+		return "", token.ILLEGAL
+	}
+
 	run := l.input[position]
 
 	if l.peekChar() == '\\' {
