@@ -788,7 +788,7 @@ func TestIfElseExpression(t *testing.T) {
 }
 
 func TestForExpressionParsing(t *testing.T) {
-	input := `for (let i = 0; i < 10; i++) { i }`
+	input := `for (i = 0; i < 10; i++) { i }`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -812,7 +812,12 @@ func TestForExpressionParsing(t *testing.T) {
 		t.Fatalf("stmt.Expression is not ast.ForExpression. got=%T", stmt.Expression)
 	}
 
-	if !testLetStatement(t, forExp.Init, "i") {
+	exprStatement, ok := forExp.Init.(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("forExp.Init is not ast.ExpressionStatement. got=%T", forExp.Init)
+	}
+
+	if !testAssignExpression(t, exprStatement.Expression, "i", "0") {
 		return
 	}
 
@@ -1090,6 +1095,28 @@ func testCallExpression(t *testing.T, exp ast.Expression, functionName string,
 				arg, fn.Arguments[i].String())
 			return false
 		}
+	}
+
+	return true
+}
+
+func testAssignExpression(t *testing.T, exp ast.Expression, name string, value string) bool {
+	assignExp, ok := exp.(*ast.AssignExpression)
+	if !ok {
+		t.Errorf("exp is not ast.AssignExpression. got=%T(%s)", exp, exp)
+		return false
+	}
+
+	if assignExp.Left.String() != name {
+		t.Errorf("assignExp.Left is not '%s'. got=%s", name,
+			assignExp.Left)
+		return false
+	}
+
+	if assignExp.Value.String() != value {
+		t.Errorf("assignExp.Value is not '%s'. got=%s", value,
+			assignExp.Value)
+		return false
 	}
 
 	return true

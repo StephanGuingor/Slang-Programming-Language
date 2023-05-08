@@ -311,11 +311,14 @@ func (p *Parser) parseForExpression() ast.Expression {
 		return nil
 	}
 
-	if !p.expectPeek(token.LET) { // TODO: support for statement without init
-		return nil
+	p.nextToken()
+
+	expression.Init = &ast.ExpressionStatement{
+		Token:      p.curToken,
+		Expression: p.parseExpression(LOWEST),
 	}
 
-	expression.Init = p.parseLetStatement()
+	p.nextToken()
 
 	if !p.curTokenIs(token.SEMICOLON) {
 		// add error
