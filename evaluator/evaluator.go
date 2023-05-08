@@ -89,6 +89,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		ident := node.TokenLiteral()
 
 		return evalPostfixExpression(node.Operator, env, ident)
+	case *ast.AssignExpression:
+		return evalAssignExpression(node, env)
 	case *ast.LetStatement:
 		val := Eval(node.Value, env)
 		if isError(val) {
@@ -127,6 +129,66 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	}
 	return NULL
+}
+
+func evalAssignExpression(exp *ast.AssignExpression, env *object.Environment) object.Object {
+	val := Eval(exp.Value, env)
+	if isError(val) {
+		return val
+	}
+
+	switch left := exp.Left.(type) {
+	case *ast.Identifier:
+		_, ok := env.Get(left.Value)
+		if !ok {
+			return newError("identifier not found: " + left.Value)
+		}
+
+		env.Set(left.Value, val)
+		return NULL
+	case *ast.IndexExpression:
+		structure := Eval(left.Left, env)
+		if isError(structure) {
+			return structure
+		}
+
+		index := Eval(left.Index, env)
+		if isError(index) {
+			return index
+		}
+
+		return evalIndexAssignExpression(structure, index, val)
+	}
+
+	return val
+}
+
+func evalIndexAssignExpression(structure object.Object, index, val object.Object) object.Object {
+	switch structure := structure.(type) {
+	case *object.Array:
+		idx, ok := index.(*object.Integer)
+		if !ok {
+			return newError("index must be an integer")
+		}
+
+		if idx.Value < 0 || idx.Value > int64(len(structure.Elements)-1) {
+			return newError("index out of bounds")
+		}
+
+		structure.Elements[idx.Value] = val
+		return NULL
+	case *object.Hash:
+		key, ok := index.(object.Hashable)
+		if !ok {
+			return newError("unusable as hash key: %s", val.Type())
+		}
+
+		hashed := key.HashKey()
+		structure.Pairs[hashed] = object.HashPair{Key: index, Value: val}
+		return NULL
+	default:
+		return newError("index operator not supported: %s", structure.Type())
+	}
 }
 
 func evalHashLiteral(node *ast.HashLiteral, env *object.Environment) object.Object {

@@ -440,6 +440,74 @@ func TestHashIndexExpressions(t *testing.T) {
 	}
 }
 
+func TestArrayIndexAssignmentExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`let a = [1, 2, 3]; a[0] = 4; a[0]`, 4},
+		{`let a = [1, 2, 3]; a[0] = 4; a[1]`, 2},
+		{`let a = [1, 2, 3]; a[0] = 4; a[2]`, 3},
+		{`let a = [1, 2, 3]; a[0] = 4; a[3]`, "index out of range: 3"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case nil:
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
+func TestAssignmentIdentifiers(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`let a = 5; a = 6; a`, 6},
+		{`let a = 5; let b = a; b`, 5},
+		{`let a = 5; let b = a; let c = a + b + 5; c`, 15},
+		{`let a = 5; let b = a; let c = a + b + 5; a = 10; c`, 15},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		}
+	}
+}
+
+func TestHashIndexAssignmentExpressions(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected interface{}
+	}{
+		{`let h = {}; h["foo"] = 5; h["foo"]`, 5},
+		{`let h = {}; h["foo"] = 5; h["bar"]`, nil},
+		{`let h = {}; h["foo"] = 5; h["bar"] = 6; h["bar"]`, 6},
+		{`let h = {}; h["foo"] = 5; h["bar"] = 6; h["foo"]`, 5},
+		{`let h = {}; h["foo"] = 5; h["bar"] = 6; h["baz"] = 7; h["baz"]`, 7},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+
+		switch expected := tt.expected.(type) {
+		case int:
+			testIntegerObject(t, evaluated, int64(expected))
+		case nil:
+			testNullObject(t, evaluated)
+		}
+	}
+}
+
 func TestArrayLiterals(t *testing.T) {
 	input := "[1, 2 * 2, 3 + 3]"
 

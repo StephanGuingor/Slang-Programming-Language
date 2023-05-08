@@ -378,6 +378,34 @@ func TestParsingHashLiteralsStringKeys(t *testing.T) {
 	}
 }
 
+func TestParseAssignExpression(t *testing.T) {
+	input := `x["pop"] = 5;`
+
+	l := lexer.New(input)
+	p := New(l)
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	stmt := program.Statements[0].(*ast.ExpressionStatement)
+	assign, ok := stmt.Expression.(*ast.AssignExpression)
+	if !ok {
+		t.Fatalf("exp is not ast.AssignExpression. got=%T", stmt.Expression)
+	}
+
+	if assign.TokenLiteral() != "=" {
+		t.Fatalf("assign.Token.Literal is not %s. got=%s", "x", assign.TokenLiteral())
+	}
+
+	if assign.Left.String() != `(x[pop])` {
+		t.Fatalf("assign.Token.Literal is not %s. got=%s", `x[pop]`, assign.Left.String())
+	}
+
+	if assign.Value.String() != "5" {
+		t.Fatalf("assign.Value.Value is not %s. got=%s", "5", assign.Value.String())
+	}
+
+}
+
 func TestParsingEmptyHashLiteral(t *testing.T) {
 	input := "{}"
 

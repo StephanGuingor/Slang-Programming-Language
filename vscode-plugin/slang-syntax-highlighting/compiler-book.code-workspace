@@ -11,6 +11,6 @@
 		}
 	],
 	"settings": {
-		"liveServer.settings.multiRootWorkspaceName": "writing_an_interpreter_in_go_1.7"
+		"liveServer.settings.multiRootWorkspaceName": "writing_a_compiler_in_go_1.2"
 	}
 }
