@@ -33,6 +33,7 @@ if (5 < 10) {
 [1, 2];
 {"foo": "bar"}
 magic(x, y) { x + y; };
+true && false || true;
 `
 
 	tests := []struct {
@@ -137,6 +138,12 @@ magic(x, y) { x + y; };
 		{token.IDENT, "y"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
+		{token.TRUE, "true"},
+		{token.AND, "&&"},
+		{token.FALSE, "false"},
+		{token.OR, "||"},
+		{token.TRUE, "true"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}

@@ -24,6 +24,8 @@ const (
 	GTE      TokenType = ">="
 	INC      TokenType = "++"
 	DEC      TokenType = "--"
+	AND      TokenType = "&&"
+	OR       TokenType = "||"
 
 	LT TokenType = "<"
 	GT TokenType = ">"

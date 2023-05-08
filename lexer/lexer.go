@@ -36,6 +36,22 @@ func (l *lexer) NextToken() token.Token {
 		} else {
 			tok = l.newToken(token.ASSIGN, l.ch)
 		}
+	case '&':
+		if l.peekChar() == '&' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.AND, Literal: string(ch) + string(l.ch), Metadata: token.TokenMetadata{Line: l.line, Column: l.column}}
+		} else {
+			tok = l.newToken(token.ILLEGAL, l.ch)
+		}
+	case '|':
+		if l.peekChar() == '|' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.OR, Literal: string(ch) + string(l.ch), Metadata: token.TokenMetadata{Line: l.line, Column: l.column}}
+		} else {
+			tok = l.newToken(token.ILLEGAL, l.ch)
+		}
 	case ';':
 		tok = l.newToken(token.SEMICOLON, l.ch)
 	case '(':

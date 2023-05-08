@@ -12,6 +12,8 @@ const (
 	_ int = iota
 	LOWEST
 	EQUALS      // ==
+	OR          // ||
+	AND         // &&
 	LESSGREATER // > or <
 	SUM         // +
 	PRODUCT     // *
@@ -33,6 +35,8 @@ var precedences = map[token.TokenType]int{
 	token.LPAREN:   CALL,
 	token.LBRACKET: INDEX,
 	token.ASSIGN:   ASSIGN,
+	token.AND:      AND,
+	token.OR:       OR,
 }
 
 type (
@@ -113,6 +117,8 @@ func New(l lexer.Lexer) *Parser {
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 	p.registerInfix(token.ASSIGN, p.parseAssignExpression)
+	p.registerInfix(token.AND, p.parseInfixExpression)
+	p.registerInfix(token.OR, p.parseInfixExpression)
 
 	p.postfixParseFns = make(map[token.TokenType]postfixParseFn)
 	p.registerPostfix(token.INC, p.parsePostfixExpression)
