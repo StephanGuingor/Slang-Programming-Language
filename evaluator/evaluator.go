@@ -139,12 +139,10 @@ func evalAssignExpression(exp *ast.AssignExpression, env *object.Environment) ob
 
 	switch left := exp.Left.(type) {
 	case *ast.Identifier:
-		_, ok := env.Get(left.Value)
+		_, ok := env.SetOnFound(left.Value, val) // this sets in the first found scope else returns error
 		if !ok {
 			return newError("identifier not found: " + left.Value)
 		}
-
-		env.Set(left.Value, val)
 		return NULL
 	case *ast.IndexExpression:
 		structure := Eval(left.Left, env)
@@ -354,15 +352,17 @@ func evalPostfixExpression(operator string, env *object.Environment, ident strin
 func evalForExpression(fe *ast.ForExpression, env *object.Environment) object.Object {
 	var bodyResult object.Object
 
-	startResult := Eval(fe.Init, env)
+	enclosedEnv := object.NewEnclosedEnvironment(env)
+
+	startResult := Eval(fe.Init, enclosedEnv)
 	if isError(startResult) {
 		return startResult
 	}
 
 	bodyResult = NULL
 
-	for isTruthy(Eval(fe.Condition, env)) {
-		bodyResult = Eval(fe.Body, env)
+	for isTruthy(Eval(fe.Condition, enclosedEnv)) {
+		bodyResult = Eval(fe.Body, enclosedEnv)
 		if isError(bodyResult) {
 			return bodyResult
 		}
@@ -371,7 +371,7 @@ func evalForExpression(fe *ast.ForExpression, env *object.Environment) object.Ob
 			return bodyResult
 		}
 
-		postResult := Eval(fe.Post, env)
+		postResult := Eval(fe.Post, enclosedEnv)
 		if isError(postResult) {
 			return postResult
 		}
@@ -394,15 +394,17 @@ func evalIdentifier(node *ast.Identifier, env *object.Environment) object.Object
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {
-	condition := Eval(ie.Condition, env)
+	enclosedEnv := object.NewEnclosedEnvironment(env)
+
+	condition := Eval(ie.Condition, enclosedEnv)
 	if isError(condition) {
 		return condition
 	}
 
 	if isTruthy(condition) {
-		return Eval(ie.Consequence, env)
+		return Eval(ie.Consequence, enclosedEnv)
 	} else if ie.Alternative != nil {
-		return Eval(ie.Alternative, env)
+		return Eval(ie.Alternative, enclosedEnv)
 	} else {
 		return NULL
 	}
