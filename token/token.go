@@ -53,6 +53,9 @@ const (
 	IF       TokenType = "IF"
 	ELSE     TokenType = "ELSE"
 	FOR      TokenType = "FOR"
+
+	// Macros
+	MAGIC TokenType = "MAGIC"
 )
 
 type TokenType string
@@ -77,6 +80,7 @@ var keywords = map[string]TokenType{
 	"if":     IF,
 	"else":   ELSE,
 	"for":    FOR,
+	"magic":  MAGIC,
 }
 
 func LookupIdent(ident string) TokenType {

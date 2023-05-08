@@ -16,9 +16,12 @@ const (
 	BOOLEAN  ObjectType = "BOOLEAN"
 	NULL     ObjectType = "NULL"
 	FUNCTION ObjectType = "FUNCTION"
+	MACRO    ObjectType = "MACRO"
 	BUILTIN  ObjectType = "BUILTIN"
 	ARRAY    ObjectType = "ARRAY"
 	HASH     ObjectType = "HASH"
+
+	QUOTE ObjectType = "QUOTE"
 
 	RETURN_VALUE ObjectType = "RETURN_VALUE"
 	ERROR        ObjectType = "ERROR"
@@ -235,4 +238,38 @@ func (s *String) HashKey() HashKey {
 	h.Write([]byte(s.Value))
 
 	return HashKey{Type: s.Type(), Value: h.Sum64()}
+}
+
+type Quote struct {
+	Node ast.Node
+}
+
+func (q *Quote) Type() ObjectType { return QUOTE }
+func (q *Quote) Inspect() string {
+	return "QUOTE(" + q.Node.String() + ")"
+}
+
+type Macro struct {
+	Parameters []*ast.Identifier
+	Body       *ast.BlockStatement
+	Env        *Environment
+}
+
+func (m *Macro) Type() ObjectType { return MACRO }
+func (m *Macro) Inspect() string {
+	var out bytes.Buffer
+
+	params := []string{}
+	for _, p := range m.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString("magic")
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") {\n")
+	out.WriteString(m.Body.String())
+	out.WriteString("\n}")
+
+	return out.String()
 }

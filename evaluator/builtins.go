@@ -191,33 +191,3 @@ func btRest(args ...object.Object) object.Object {
 
 	return &object.Array{Elements: newElements}
 }
-
-// func btMap(args ...object.Object) object.Object {
-// 	if len(args) != 2 {
-// 		return newError("wrong number of arguments. got=%d, want=2",
-// 			len(args))
-// 	}
-
-// 	iterable := args[1]
-
-// 	if iterable.Type() != object.ARRAY {
-// 		return newError("argument to `map` not supported, got %s",
-// 			iterable.Type())
-// 	}
-
-// 	array := iterable.(*object.Array)
-// 	fn := args[0]
-
-// 	if fn.Type() != object.FUNCTION {
-// 		return newError("argument to `map` not supported, got %s",
-// 			fn.Type())
-// 	}
-
-// 	var elements []object.Object
-
-// 	for _, e := range array.Elements {
-// 		elements = append(elements, apply(fn, []object.Object{e}))
-// 	}
-
-// 	return &object.Map{Elements: elements, Fn: fn}
-// }

@@ -21,9 +21,9 @@ let result = add(five, ten);
 5 < 10 > 5;
 
 if (5 < 10) {
-	return true;
+    return true;
 } else {
-	return false;
+    return false;
 }
 
 10 == 10;
@@ -32,6 +32,7 @@ if (5 < 10) {
 "foo bar"
 [1, 2];
 {"foo": "bar"}
+magic(x, y) { x + y; };
 `
 
 	tests := []struct {
@@ -124,6 +125,19 @@ if (5 < 10) {
 		{token.COLON, ":"},
 		{token.STRING, "bar"},
 		{token.RBRACE, "}"},
+		{token.MAGIC, "magic"},
+		{token.LPAREN, "("},
+		{token.IDENT, "x"},
+		{token.COMMA, ","},
+		{token.IDENT, "y"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.IDENT, "x"},
+		{token.PLUS, "+"},
+		{token.IDENT, "y"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
 

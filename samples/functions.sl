@@ -54,3 +54,18 @@ let mod = fn(a, b) { a - (b * (a / b)); };
 
 print("Filtering even numbers: ", filter([1, 2, 3, 4], fn(x) { mod(x, 2) == 0 }));
 
+// Creating a macros
+let unless = magic(condition, consequence, alternative) {
+    quote(if (!(unquote(condition))) {
+        unquote(consequence);
+    } else {
+        unquote(alternative);
+    });
+};
+
+let debug = magic() { quote(true) };
+
+unless(debug(),  // alter language AST to change evaluation
+    print("not greater"), 
+    print("greater")
+);
